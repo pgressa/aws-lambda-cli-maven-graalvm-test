@@ -37,18 +37,20 @@ jobs:
         env:
             AWS_ROLE_ARN: ${{ secrets.AWS_ROLE_ARN }}
         run: |
+          ls -la target
           chmod 755 bootstrap target/aws-lambda-cli-maven-graalvm-test
+          ls -la target
           zip -j target/function.zip bootstrap target/aws-lambda-cli-maven-graalvm-test
           ZIP_PATH=target/function.zip
           if aws lambda get-function --function-name "${FUNCTION_NAME}" > /dev/null 2>&1; then
             aws lambda update-function-code \
               --function-name "${FUNCTION_NAME} \
-              --zip-file fileb://${APP_PATH}
+              --zip-file fileb://${ZIP_PATH}
           else
             aws lambda create-function \
               --function-name "${FUNCTION_NAME} \
               --runtime provided \
-              --zip-file fileb://${APP_PATH}
+              --zip-file fileb://${ZIP_PATH}
               --handler io.micronaut.function.aws.proxy.MicronautLambdaHandler \
               --role $AWS_ROLE_ARN
           fi
